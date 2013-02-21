@@ -4,6 +4,7 @@ import time
 import requests
 
 HN_API_URL = "http://api.ihackernews.com/"
+NUM_POINTS_TO_CONSIDER = 6
 
 # Based on http://stackoverflow.com/questions/567622/is-there-a-pythonic-way-to-try-something-up-to-a-maximum-number-of-times
 def retry(max_attempts):
@@ -37,8 +38,8 @@ def fetch_scores(page_type):
     return scores
 
 if __name__ == '__main__':
-    highest_new_submissions = max(fetch_scores('new'))
-    lowest_front_page_submissions = min(fetch_scores('page'))
+    highest_new_submissions = sorted(fetch_scores('new'))[0:NUM_POINTS_TO_CONSIDER]
+    lowest_front_page_submissions = sorted(fetch_scores('page'))[-1 * NUM_POINTS_TO_CONSIDER:]
 
     print(highest_new_submissions)
     print(lowest_front_page_submissions)
