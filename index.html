@@ -1,0 +1,54 @@
+<html>
+<head>
+  <title>HN Notify</title>
+  <script type="text/javascript" src="https://cdn.firebase.com/v0/firebase.js"></script>
+  <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+  <script type='text/javascript' src='http://code.highcharts.com/2.2.4/highcharts.js'></script>
+</head>
+<body>
+<div id='chart' style='width: 800px; height: 400px; margin: 0 auto'></div>
+<script type='text/javascript'>
+
+  Highcharts.setOptions({global: {useUTC: false}});
+  var chart = new Highcharts.Chart({
+        chart: {
+          renderTo: 'chart',
+          defaultSeriesType: 'areaspline',
+        },
+        title: {
+          text: 'Hacker News Scores'
+        },
+        xAxis: {
+          type: 'datetime'
+        },
+        yAxis: {
+          minPadding: 0.2,
+          maxPadding: 0.2,
+          title: {
+            text: 'Points',
+            margin: 80
+          }
+        },
+        series: [
+        { name: 'Highest New', data: [] },
+        { name: 'Lowest front page', data: []}
+        ]
+    }
+  )
+  var score_db = new Firebase('https://hn-notify-dev.firebaseio.com/scores');
+
+  score_db.on('child_added', function (db_update) {
+    var scores = db_update.val();
+
+    //Shift if there's more than ~two days of data
+    var series = chart.series[0],
+        shift = series.data.length > 1500;
+
+    // Javascript time is unix time * 1000
+    chart.series[0].addPoint([scores['time'] * 1000, scores['new']], true, shift);
+    chart.series[1].addPoint([scores['time'] * 1000, scores['front']], true, shift);
+  });
+
+</script>
+</body>
+</html>
