@@ -3,11 +3,13 @@
 from __future__ import division
 import time
 
+import firebase
 import numpy
 import requests
 
 HN_API_URL = "http://api.ihackernews.com/"
-NUM_POINTS_TO_CONSIDER = 6
+NUM_POINTS_TO_CONSIDER = 7
+FIREBASE_URL = "https://hn-notify-dev.firebaseio.com/scores"
 
 # Based on http://stackoverflow.com/questions/567622/is-there-a-pythonic-way-to-try-something-up-to-a-maximum-number-of-times
 def retry(max_attempts):
@@ -27,8 +29,8 @@ def retry(max_attempts):
     return try_it
 
 # The HN api frequently returns 500 errors, so we need to retry errors
-@retry(15)
-def fetch_scores(page_type):
+@retry(20)
+def fetch(page_type):
     assert page_type in ['new', 'page']
 
     url = HN_API_URL + page_type
@@ -40,15 +42,25 @@ def fetch_scores(page_type):
 
     return scores
 
-def pickup_ratio():
-    highest_new_submissions = sorted(fetch_scores('new'), reverse=True)[:NUM_POINTS_TO_CONSIDER]
-    lowest_front_page_submissions = sorted(fetch_scores('page'))[:NUM_POINTS_TO_CONSIDER]
+def calculate():
+    highest_new_submissions = sorted(fetch('new'), reverse=True)[:NUM_POINTS_TO_CONSIDER]
+    lowest_front_page_submissions = sorted(fetch('page'))[:NUM_POINTS_TO_CONSIDER]
 
     avg_new = numpy.median(highest_new_submissions)
     avg_front = numpy.median(lowest_front_page_submissions)
 
-    return avg_new / avg_front
+    return {'new': avg_new, 'front': avg_front, 'time': int(time.time())}
 
+def write(scores):
+    db = firebase.Firebase(FIREBASE_URL)
+    db.push(scores)
 
 if __name__ == '__main__':
-    print("Current pickup ratio is: {}".format(pickup_ratio()))
+    while True:
+        try:
+            scores = calculate()
+            write(scores)
+            print("Current median scores are: {}".format(scores))
+        except Exception as error:
+            print("ERROR: {}".format(error))
+        time.sleep(60)
