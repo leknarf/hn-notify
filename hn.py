@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
+from __future__ import division
 import time
+
+import numpy
 import requests
 
 HN_API_URL = "http://api.ihackernews.com/"
@@ -18,13 +21,13 @@ def retry(max_attempts):
                     if attempts >= max_attempts:
                         raise error
                     print("{}. Retrying... attempt {}".format(error, attempts))
-                    time.sleep(5)
+                    time.sleep(10)
                     attempts += 1
         return wrapped_func
     return try_it
 
 # The HN api frequently returns 500 errors, so we need to retry errors
-@retry(10)
+@retry(15)
 def fetch_scores(page_type):
     assert page_type in ['new', 'page']
 
@@ -37,13 +40,15 @@ def fetch_scores(page_type):
 
     return scores
 
+def pickup_ratio():
+    highest_new_submissions = sorted(fetch_scores('new'), reverse=True)[:NUM_POINTS_TO_CONSIDER]
+    lowest_front_page_submissions = sorted(fetch_scores('page'))[:NUM_POINTS_TO_CONSIDER]
+
+    avg_new = numpy.median(highest_new_submissions)
+    avg_front = numpy.median(lowest_front_page_submissions)
+
+    return avg_new / avg_front
+
+
 if __name__ == '__main__':
-    highest_new_submissions = sorted(fetch_scores('new'))[0:NUM_POINTS_TO_CONSIDER]
-    lowest_front_page_submissions = sorted(fetch_scores('page'))[-1 * NUM_POINTS_TO_CONSIDER:]
-
-    print(highest_new_submissions)
-    print(lowest_front_page_submissions)
-
-
-
-
+    print("Current pickup ratio is: {}".format(pickup_ratio()))
