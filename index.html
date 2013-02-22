@@ -35,7 +35,7 @@
         ]
     }
   )
-  var score_db = new Firebase('https://hn-notify-dev.firebaseio.com/scores');
+  var score_db = new Firebase('https://hn-notify-prod.firebaseio.com/scores');
 
   score_db.on('child_added', function (db_update) {
     var scores = db_update.val();

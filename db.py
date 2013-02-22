@@ -17,4 +17,4 @@ def fetch_notification_time():
     db = firebase.Firebase(FIREBASE_URL + 'notification_time')
     result = db.get()()
 
-    return result.get('last', 0)
+    return result['last'] if result else 0
