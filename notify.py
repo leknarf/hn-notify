@@ -5,6 +5,8 @@ import twitter
 
 import db
 
+MINIMUM_FRONT_PAGE_SCORE = 5
+
 def tweet(scores):
     api = twitter.Api(
         consumer_key=os.environ['twitter_consumer_key'],
@@ -16,12 +18,28 @@ def tweet(scores):
 
     api.PostUpdate(message)
 
-def notify(scores):
-    # Only send notification if new score is greater than front page score
-    if scores['front'] > scores['new']:
-        return
-    # Only send notification if we haven't done so in the last hour
+def _should_post(scores):
+    """
+    Defines whether it is currently a "good time" to post
+    """
+    if (
+        # We obviously want the new score to exceed the front page score
+        scores['new'] > scores['front'] + 1
+        # setting a minimum prevents us from posting in the middle of the night when no one is using HN
+        and scores['front'] >= MINIMUM_FRONT_PAGE_SCORE
+    ):
+        return True
+    return False
+
+def _posted_recently():
+    """
+    We don't want to re-post if we've done so in the last hour
+    """
     if (time.time() - db.fetch_notification_time()) < 60*60:
-        return
-    db.update_notification_time()
-    tweet(scores)
+        return True
+    return False
+
+def notify(scores):
+    if _should_post(scores) and not _posted_recently():
+        db.update_notification_time()
+        tweet(scores)

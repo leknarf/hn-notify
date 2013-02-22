@@ -3,14 +3,12 @@
 from __future__ import division
 import time
 
-import numpy
 import requests
 
 import db
 import notify
 
 HN_API_URL = "http://api.ihackernews.com/"
-NUM_POINTS_TO_CONSIDER = 7
 
 # Based on http://stackoverflow.com/questions/567622/is-there-a-pythonic-way-to-try-something-up-to-a-maximum-number-of-times
 def retry(max_attempts):
@@ -44,21 +42,22 @@ def fetch(page_type):
     return scores
 
 def calculate():
-    highest_new_submissions = sorted(fetch('new'), reverse=True)[:NUM_POINTS_TO_CONSIDER]
-    lowest_front_page_submissions = sorted(fetch('page'))[:NUM_POINTS_TO_CONSIDER]
+    highest_new_submissions = sorted(fetch('new'), reverse=True)
+    lowest_front_page_submissions = sorted(fetch('page'))
 
-    avg_new = int(numpy.median(highest_new_submissions))
-    avg_front = int(numpy.median(lowest_front_page_submissions))
+    # Report the second-highest and second-lowest score
+    new_score = highest_new_submissions[1]
+    front_score = lowest_front_page_submissions[1]
 
-    return {'new': avg_new, 'front': avg_front, 'time': int(time.time())}
+    return {'new': new_score, 'front': front_score, 'time': int(time.time())}
 
 if __name__ == '__main__':
     while True:
-        try:
-            scores = calculate()
-            db.write_scores(scores)
-            notify.notify(scores)
-            print("Current median scores are: {}".format(scores))
-        except Exception as error:
-            print("ERROR: {}".format(error))
-        time.sleep(60)
+        #try:
+        scores = calculate()
+        db.write_scores(scores)
+        notify.notify(scores)
+        print("Current median scores are: {}".format(scores))
+        #except Exception as error:
+            #print("ERROR: {}".format(error))
+        time.sleep(60*5)
