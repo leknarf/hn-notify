@@ -14,7 +14,7 @@ def tweet(scores):
         access_token_key=os.environ['twitter_access_token'],
         access_token_secret=os.environ['twitter_token_secret']
     )
-    message = "It's a good time to post! The median high score on 'New' is {new} and the median low score on the front page is {front}.".format(**scores)
+    message = "It's a good time to post! The second-highest score on 'New' is {new} and the second-lowest score on the front page is {front}.".format(**scores)
 
     api.PostUpdate(message)
 
