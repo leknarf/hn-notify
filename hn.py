@@ -3,13 +3,14 @@
 from __future__ import division
 import time
 
-import firebase
 import numpy
 import requests
 
+import db
+import notify
+
 HN_API_URL = "http://api.ihackernews.com/"
 NUM_POINTS_TO_CONSIDER = 7
-FIREBASE_URL = "https://hn-notify-dev.firebaseio.com/scores"
 
 # Based on http://stackoverflow.com/questions/567622/is-there-a-pythonic-way-to-try-something-up-to-a-maximum-number-of-times
 def retry(max_attempts):
@@ -46,20 +47,17 @@ def calculate():
     highest_new_submissions = sorted(fetch('new'), reverse=True)[:NUM_POINTS_TO_CONSIDER]
     lowest_front_page_submissions = sorted(fetch('page'))[:NUM_POINTS_TO_CONSIDER]
 
-    avg_new = numpy.median(highest_new_submissions)
-    avg_front = numpy.median(lowest_front_page_submissions)
+    avg_new = int(numpy.median(highest_new_submissions))
+    avg_front = int(numpy.median(lowest_front_page_submissions))
 
     return {'new': avg_new, 'front': avg_front, 'time': int(time.time())}
-
-def write(scores):
-    db = firebase.Firebase(FIREBASE_URL)
-    db.push(scores)
 
 if __name__ == '__main__':
     while True:
         try:
             scores = calculate()
-            write(scores)
+            db.write_scores(scores)
+            notify.notify(scores)
             print("Current median scores are: {}".format(scores))
         except Exception as error:
             print("ERROR: {}".format(error))
