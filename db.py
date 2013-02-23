@@ -5,6 +5,7 @@ import json
 import requests
 
 FIREBASE_URL = os.environ['firebase_url']
+FIREBASE_SECRET = os.environ['firebase_secret']
 
 def __url(target):
     return FIREBASE_URL + target + '.json'
@@ -15,7 +16,7 @@ def _firebase_request(method, target, data=None):
     if data:
         data = json.dumps(data)
     try:
-        req = requests.request(method, __url(target), data=data)
+        req = requests.request(method, __url(target), data=data, params={'auth':FIREBASE_SECRET})
         req.raise_for_status()
         return req.json()
     except Exception as error:
