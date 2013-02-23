@@ -15,8 +15,7 @@ $(document).ready(function () {
           minPadding: 0.2,
           maxPadding: 0.2,
           title: {
-            text: 'Points',
-            margin: 80
+            text: 'Points'
           }
         },
         series: [
@@ -28,7 +27,11 @@ $(document).ready(function () {
   chart.showLoading();
 
   var score_db = new Firebase('https://hn-notify-prod.firebaseio.com/scores');
-  score_db.on('child_added', function (db_update) {
+
+  // Only show the past 12 hours, to improve chart load time
+  var start_time = (new Date().getTime() / 1000) - 60*60*12;
+
+  score_db.startAt(start_time).on('child_added', function (db_update) {
     var scores = db_update.val();
 
     //Shift if there's more than ~two days of data
