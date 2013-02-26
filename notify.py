@@ -5,7 +5,7 @@ import twitter
 
 import db
 
-MINIMUM_FRONT_PAGE_SCORE = 5
+MINIMUM_FRONT_PAGE_SCORE = 10
 
 def tweet(scores):
     api = twitter.Api(
