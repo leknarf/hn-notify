@@ -5,7 +5,7 @@ import twitter
 
 import db
 
-MINIMUM_FRONT_PAGE_SCORE = 10
+MINIMUM_NEW_SCORE = 10
 
 def tweet(scores):
     api = twitter.Api(
@@ -26,7 +26,7 @@ def _should_post(scores):
         # We obviously want the new score to exceed the front page score
         scores['new'] > scores['front'] + 1
         # setting a minimum prevents us from posting in the middle of the night when no one is using HN
-        and scores['front'] >= MINIMUM_FRONT_PAGE_SCORE
+        and scores['new'] >= MINIMUM_NEW_SCORE
     ):
         return True
     return False
