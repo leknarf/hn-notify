@@ -53,11 +53,11 @@ def calculate():
 
 if __name__ == '__main__':
     while True:
-        #try:
-        scores = calculate()
-        db.write_scores(scores)
-        notify.notify(scores)
-        print("Current median scores are: {}".format(scores))
-        #except Exception as error:
-            #print("ERROR: {}".format(error))
+        try:
+            scores = calculate()
+            db.write_scores(scores)
+            notify.notify(scores)
+            print("Current median scores are: {}".format(scores))
+        except Exception as error:
+            print("ERROR: {}".format(error))
         time.sleep(60*5)
