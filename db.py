@@ -16,7 +16,7 @@ def _firebase_request(method, target, data=None):
     if data:
         data = json.dumps(data)
     try:
-        req = requests.request(method, __url(target), data=data, params={'auth':FIREBASE_SECRET})
+        req = requests.request(method, __url(target), data=data, params={'auth':FIREBASE_SECRET}, verify=False)
         req.raise_for_status()
         return req.json()
     except Exception as error:
