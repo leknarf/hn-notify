@@ -7,13 +7,17 @@ import db
 
 MINIMUM_NEW_SCORE = 10
 
-def tweet(scores):
+def init_api():
     api = twitter.Api(
         consumer_key=os.environ['twitter_consumer_key'],
         consumer_secret=os.environ['twitter_consumer_secret'],
         access_token_key=os.environ['twitter_access_token'],
         access_token_secret=os.environ['twitter_token_secret']
     )
+    return api
+
+def tweet(scores):
+    api = init_api()
     message = "It's a good time to post! The second-highest score on 'New' is {new} and the second-lowest score on the front page is {front}.".format(**scores)
 
     api.PostUpdate(message)
